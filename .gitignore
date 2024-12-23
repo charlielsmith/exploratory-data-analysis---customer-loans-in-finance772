@@ -1,0 +1,6 @@
+credentials.yaml
+cleaned_data.csv
+loan_payments.csv
+__pycache__/
+.ipynb_checkpoints/
+data/
