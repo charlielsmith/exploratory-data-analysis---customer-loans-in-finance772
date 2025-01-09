@@ -5,6 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
 from data_cleaning import DataTransform
+from scipy.stats import zscore
 
 class DataFrameInfo:
     def __init__(self, df):
@@ -58,6 +59,17 @@ class Plotter:
             plt.show()
         else:
             print(f"Column '{column}' not found in the DataFrame.")
+    
+    def plot_all_boxplots(self):
+        """Generate box plots for all numeric columns."""
+        numeric_columns = self.df.select_dtypes(include=['number']).columns
+
+        for column in numeric_columns:
+            plt.figure(figsize=(10, 5))
+            sns.boxplot(x=self.df[column])
+            plt.title(f"Box Plot of {column}")
+            plt.xlabel(column)
+            plt.show()
 
     def plot_all_numeric_columns(self, bins=50):
         """ Plot histogram for all numeric columns."""
@@ -152,6 +164,30 @@ class DataFrameTransform:
             most_common_date = self.df['last_credit_pull_date'].mode()[0]
             self.df['last_credit_pull_date'].fillna(most_common_date, inplace=True)
             print("Imputed missing values in 'last_credit_pull_date' using mode.")
+
+    def remove_outliers_iqr(self, factor=1.0):
+        """
+        Remove outliers using the IQR method for all numeric columns.
+        
+        :param factor: Determines the outlier threshold (default is 1.5 for mild outliers).
+        """
+        numeric_columns = self.df.select_dtypes(include=['number']).columns
+
+        for column in numeric_columns:
+            Q1 = self.df[column].quantile(0.25)  # First quartile (25th percentile)
+            Q3 = self.df[column].quantile(0.75)  # Third quartile (75th percentile)
+            IQR = Q3 - Q1  # Interquartile range
+
+            lower_bound = Q1 - (factor * IQR)
+            upper_bound = Q3 + (factor * IQR)
+
+            # Log the bounds for debugging
+            print(f"{column}: Lower Bound = {lower_bound}, Upper Bound = {upper_bound}")
+
+            # Filter out rows that fall outside the bounds
+            self.df = self.df[(self.df[column] >= lower_bound) & (self.df[column] <= upper_bound)]
+
+        return self.df
     
     def drop_rows_with_missing(self):
         self.df.dropna(inplace=True)
