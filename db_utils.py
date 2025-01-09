@@ -112,9 +112,6 @@ if __name__ == "__main__":
             # Step 5: Save the data to a CSV file
             if data_frame is not None:
                 save_data_to_csv(data_frame, "loan_payments.csv")
-    
-
-
 
 # Create a function which will load the data from your local machine into a Pandas DataFrame
 df = pd.read_csv('loan_payments.csv')
@@ -125,6 +122,7 @@ credentials = load_credentials('credentials.yaml')
 if credentials:
     rds_connector = RDSDatabaseConnector(credentials)
     engine = rds_connector.init_engine()
+    print(f"Engine initialized: {engine}")
 
     # Extract data
     df = rds_connector.extract_data(engine)

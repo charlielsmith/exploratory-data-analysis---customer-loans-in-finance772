@@ -165,7 +165,7 @@ class DataFrameTransform:
             self.df['last_credit_pull_date'].fillna(most_common_date, inplace=True)
             print("Imputed missing values in 'last_credit_pull_date' using mode.")
 
-    def remove_outliers_iqr(self, factor=1.0):
+    def remove_outliers_iqr(self, factor=1.5):
         """
         Remove outliers using the IQR method for all numeric columns.
         
@@ -330,6 +330,8 @@ if __name__ == "__main__":
     data_frame.to_csv('cleaned_data.csv', index=False)
 
     print("Data cleaning, transformation, and visualization completed!")
+
+    df_transform.remove_outliers_iqr()
 
 
 
