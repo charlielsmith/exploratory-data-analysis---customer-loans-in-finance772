@@ -37,7 +37,7 @@ class DataFrameInfo:
         distinct_counts = {col: self.df[col].nunique() for col in categorical_columns.columns}
 
         print("\nDistinct Value Counts in Categorical Columns`:")
-        for col, count in distinct_counts.item():
+        for col, count in distinct_counts.items():
             print(f"{col}: {count} distinct values")
         
     def shape_of_data(self):
@@ -146,12 +146,12 @@ class DataFrameTransform:
                     self.df[column].fillna(self.df[column].mode()[0], inplace=True)
                 print(f"Imputed missing values in '{column} using {strategy}.")
 
-         # Handle additional columns with missing values manually
-         # For 'last_payment_date', use the mode
-        if 'last_payment_date' in self.df.columns:
-            most_common_date = self.df['last_payment_date'].mode()[0]
-            self.df['last_payment_date'].fillna(most_common_date, inplace=True)
-            print("Imputed missing values in 'last_payment_date' using mode.")
+                # Handle additional columns with missing values manually
+                # For 'last_payment_date', use the mode
+                if 'last_payment_date' in self.df.columns:
+                    most_common_date = self.df['last_payment_date'].mode()[0]
+                    self.df['last_payment_date'].fillna(most_common_date, inplace=True)
+                    print("Imputed missing values in 'last_payment_date' using mode.")
 
          # For 'collections_12_mths_ex_med', use the median
         if 'collections_12_mths_ex_med' in self.df.columns:
@@ -193,6 +193,19 @@ class DataFrameTransform:
         self.df.dropna(inplace=True)
         print("\nDropped rows with any missing values.")
 
+    def drop_rows_with_missing_funded_amount(self):
+        """Drops rows where 'funded_amount' is missing."""
+        self.df = self.df.dropna(subset=['funded_amount'])
+        print("Dropped rows with missing values in 'funded_amount'.")
+
+    def drop_highly_correlated_columns(self, columns_to_drop):
+        """Drops specified highly correlated columns."""
+        self.df = self.df.drop(columns=columns_to_drop)
+        print(f"Dropped highly correlated columns: {columns_to_drop}")
+
+    def get_dataframe(self):
+        """Returns the transformed DataFrame."""
+        return self.df
 
     def log_transform_severe_skew(self):
         """
@@ -280,11 +293,12 @@ class DataAnalysis:
         else:
             print(f"Column '{column}' not found in the DataFrame.")
 
+
 if __name__ == "__main__":
     # Load CSV into a DataFrame
     data_frame = pd.read_csv('loan_payments.csv')
 
-    # Initialize classes
+    # Initialise classes
     df_info = DataFrameInfo(data_frame)
     df_transform = DataFrameTransform(data_frame)
     plotter = Plotter(data_frame)
@@ -294,7 +308,7 @@ if __name__ == "__main__":
     df_info.customer_loans_info()
     df_info.customer_loans_descriptive_stats()
 
-    # Step 2: Visualize numeric columns for outliers
+    # Step 2: Visualise numeric columns for outliers
     print("\nStep 2: Visualizing all numeric columns for outliers...")
     plotter.plot_all_numeric_columns()
 
@@ -329,9 +343,13 @@ if __name__ == "__main__":
     print("\nStep 8: Saving cleaned and transformed dataset")
     data_frame.to_csv('cleaned_data.csv', index=False)
 
-    print("Data cleaning, transformation, and visualization completed!")
-
+    # Step 9: Remove outliers using IQR
+    print("\nStep 9: Removing outliers using IQR...")
     df_transform.remove_outliers_iqr()
 
+    # Step 10: Visualise box plots after outlier removal
+    print("\nStep 10: Visualising box plots after outlier removal...")
+    updated_plotter = Plotter(df_transform.df)
+    updated_plotter.plot_all_numeric_columns()
 
-
+    print("Data cleaning, transformation, and visualisation completed!")
