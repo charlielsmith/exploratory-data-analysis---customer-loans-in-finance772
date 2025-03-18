@@ -145,13 +145,22 @@ class DataFrameTransform:
                 elif strategy == 'mode':
                     self.df[column].fillna(self.df[column].mode()[0], inplace=True)
                 print(f"Imputed missing values in '{column} using {strategy}.")
-
+                
+        if 'term' in self.df.columns:
+            self.df['term'] = (
+                self.df['term']
+                .astype(str)
+                .str.replace(' months', '', regex=True)  # Remove ' months'
+                .replace('nan', np.nan)  # Convert string 'nan' to real NaN
+                .astype(float)  # Convert to numeric
+        )
+        print("Converted 'term' column to numeric format.")
                 # Handle additional columns with missing values manually
                 # For 'last_payment_date', use the mode
-                if 'last_payment_date' in self.df.columns:
-                    most_common_date = self.df['last_payment_date'].mode()[0]
-                    self.df['last_payment_date'].fillna(most_common_date, inplace=True)
-                    print("Imputed missing values in 'last_payment_date' using mode.")
+        if 'last_payment_date' in self.df.columns:
+            most_common_date = self.df['last_payment_date'].mode()[0]
+            self.df['last_payment_date'].fillna(most_common_date, inplace=True)
+        print("Imputed missing values in 'last_payment_date' using mode.")
 
          # For 'collections_12_mths_ex_med', use the median
         if 'collections_12_mths_ex_med' in self.df.columns:
@@ -321,6 +330,7 @@ if __name__ == "__main__":
         'employment_length': 'mode',
     }
     df_transform.impute_missing_values(imputation_strategies)
+
 
     # Step 4: Plot missing values before and after imputation
     print("\nStep 4: Plotting missing values before and after imputation")

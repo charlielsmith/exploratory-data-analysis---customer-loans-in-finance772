@@ -82,9 +82,8 @@ class DataTransform:
         return self.df
     
     def convert_term(self):
-        """Creates a mapping dictionary and converts values"""
-        # Handling missing values and converting '36 months' and '60 months'
-        self.df['term'] = self.df['term'].replace({None: 'None', '36 months': 1, '60 months': 2})
+        """Converts 'term' column from strings to integers"""
+        self.df['term_months'] = self.df['term'].str.extract('(\d+)').astype(float).fillna(0).astype(int)
 
         # If there are still 'None' values, you can map them to 0, or you can keep them as NaN
         self.df['term'] = self.df['term'].map({'None': 0, 1: 1, 2: 2})
